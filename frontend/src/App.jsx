@@ -1,9 +1,26 @@
 import { useState } from 'react'
 import './App.css'
 
+const LIGAS = {
+  "Premier League": ["Arsenal", "Aston Villa", "Bournemouth", "Brentford", "Brighton", "Chelsea", "Crystal Palace", "Everton", "Fulham", "Ipswich Town", "Leicester City", "Liverpool", "Manchester City", "Manchester United", "Newcastle", "Nottingham Forest", "Southampton", "Tottenham", "West Ham", "Wolves"],
+  "La Liga": ["Alavés", "Athletic Club", "Atlético Madrid", "Barcelona", "Betis", "Celta", "Espanyol", "Getafe", "Girona", "Las Palmas", "Leganés", "Mallorca", "Osasuna", "Rayo Vallecano", "Real Madrid", "Real Sociedad", "Sevilla", "Valencia", "Valladolid", "Villarreal"],
+  "Serie A": ["Atalanta", "Bologna", "Cagliari", "Como", "Empoli", "Fiorentina", "Genoa", "Inter", "Juventus", "Lazio", "Lecce", "Milan", "Monza", "Napoli", "Parma", "Roma", "Torino", "Udinese", "Venezia", "Verona"],
+  "Bundesliga": ["Augsburg", "Bayern Munich", "Bochum", "Dortmund", "Eintracht Frankfurt", "Freiburg", "Heidenheim", "Hoffenheim", "Holstein Kiel", "Leverkusen", "Mainz", "Mönchengladbach", "RB Leipzig", "St. Pauli", "Stuttgart", "Union Berlin", "Werder Bremen", "Wolfsburg"],
+  "Ligue 1": ["Angers", "Auxerre", "Brest", "Le Havre", "Lens", "Lille", "Lyon", "Marseille", "Monaco", "Montpellier", "Nantes", "Nice", "Paris Saint-Germain", "Reims", "Rennes", "Saint-Étienne", "Strasbourg", "Toulouse"],
+  "Liga Boliviana": ["Always Ready", "Aurora", "Blooming", "Bolívar", "Guabirá", "Independiente Petrolero", "Jorge Wilstermann", "Nacional Potosí", "Oriente Petrolero", "Real Santa Cruz", "Royal Pari", "San Antonio Bulo Bulo", "The Strongest", "Universitario de Vinto"],
+  "Champions League": ["Arsenal", "Aston Villa", "Atlético Madrid", "Barcelona", "Bayern Munich", "Benfica", "Borussia Dortmund", "Celtic", "Club Brugge", "Feyenoord", "Inter", "Juventus", "Leverkusen", "Liverpool", "Manchester City", "Milan", "Monaco", "PSG", "Real Madrid", "Sporting CP"],
+  "Copa Libertadores": ["Atlético Mineiro", "Boca Juniors", "Bolívar", "Colo-Colo", "Flamengo", "Fluminense", "Grêmio", "Independiente del Valle", "Palmeiras", "Peñarol", "River Plate", "San Lorenzo", "São Paulo", "The Strongest"],
+  "Copa Sudamericana": ["Always Ready", "América Mineiro", "Athletico Paranaense", "Barcelona SC", "Belgrano", "Botafogo", "Bragantino", "Corinthians", "Defensa y Justicia", "Fortaleza", "Internacional", "Lanús", "LDU Quito", "Racing"]
+}
+
 function App() {
+  const [ligaLocal, setLigaLocal] = useState("Premier League")
+  const [ligaVisitante, setLigaVisitante] = useState("Premier League")
+  const [equipoLocal, setEquipoLocal] = useState("Arsenal")
+  const [equipoVisitante, setEquipoVisitante] = useState("Liverpool")
+
   const [form, setForm] = useState({
-    comentario: 'El equipo local viene en una racha increible y seguro goleamos hoy en casa',
+    comentario: "El equipo local viene en una racha increible y seguro goleamos hoy en casa",
     promedio_goles_local: 2.1,
     promedio_goles_visitante: 0.9,
     racha_puntos_local: 12,
@@ -12,49 +29,57 @@ function App() {
 
   const [resultado, setResultado] = useState(null)
   const [cargando, setCargando] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState("")
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setForm(prev => ({
       ...prev,
-      [name]: name === 'comentario' ? value : parseFloat(value) || 0
+      [name]: name.includes("promedio") || name.includes("racha") ? parseFloat(value) || 0 : value
     }))
   }
 
   const predecir = async (e) => {
     e.preventDefault()
     setCargando(true)
-    setError('')
+    setError("")
     setResultado(null)
 
     try {
-      const res = await fetch('/api/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+      const payload = {
+        comentario: form.comentario,
+        promedio_goles_local: form.promedio_goles_local,
+        promedio_goles_visitante: form.promedio_goles_visitante,
+        racha_puntos_local: form.racha_puntos_local,
+        racha_puntos_visitante: form.racha_puntos_visitante
+      }
+
+      const res = await fetch("/api/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       })
 
-      if (!res.ok) throw new Error('Error en la API')
+      if (!res.ok) throw new Error("Error en la API")
       const data = await res.json()
       setResultado(data)
     } catch (err) {
-      setError('No se pudo conectar con el backend. Asegúrate de que la API esté corriendo en http://localhost:8000')
+      setError("No se pudo conectar con el backend. Asegúrate de que la API esté corriendo en http://localhost:8000")
     } finally {
       setCargando(false)
     }
   }
 
   const getColor = (pred) => {
-    if (pred === 'local') return '#10b981'
-    if (pred === 'empate') return '#f59e0b'
-    return '#ef4444'
+    if (pred === "local") return "#10b981"
+    if (pred === "empate") return "#f59e0b"
+    return "#ef4444"
   }
 
   const getLabel = (pred) => {
-    if (pred === 'local') return 'Victoria Local'
-    if (pred === 'empate') return 'Empate'
-    return 'Victoria Visitante'
+    if (pred === "local") return equipoLocal
+    if (pred === "empate") return "Empate"
+    return equipoVisitante
   }
 
   return (
@@ -84,14 +109,20 @@ function App() {
                 value={form.comentario}
                 onChange={handleChange}
                 rows={3}
-                placeholder="Escribí un comentario o análisis del partido..."
                 required
               />
             </div>
 
             <div className="stats-grid">
               <div className="stat-group">
-                <h3>Equipo Local</h3>
+                <label>Liga Local</label>
+                <select value={ligaLocal} onChange={(e) => { setLigaLocal(e.target.value); setEquipoLocal(LIGAS[e.target.value][0]) }}>
+                  {Object.keys(LIGAS).map(liga => <option key={liga}>{liga}</option>)}
+                </select>
+                <label>Equipo Local</label>
+                <select value={equipoLocal} onChange={(e) => setEquipoLocal(e.target.value)}>
+                  {LIGAS[ligaLocal].map(eq => <option key={eq}>{eq}</option>)}
+                </select>
                 <div className="inputs">
                   <div className="field">
                     <label>Prom. Goles</label>
@@ -107,7 +138,14 @@ function App() {
               <div className="vs">VS</div>
 
               <div className="stat-group">
-                <h3>Equipo Visitante</h3>
+                <label>Liga Visitante</label>
+                <select value={ligaVisitante} onChange={(e) => { setLigaVisitante(e.target.value); setEquipoVisitante(LIGAS[e.target.value][0]) }}>
+                  {Object.keys(LIGAS).map(liga => <option key={liga}>{liga}</option>)}
+                </select>
+                <label>Equipo Visitante</label>
+                <select value={equipoVisitante} onChange={(e) => setEquipoVisitante(e.target.value)}>
+                  {LIGAS[ligaVisitante].map(eq => <option key={eq}>{eq}</option>)}
+                </select>
                 <div className="inputs">
                   <div className="field">
                     <label>Prom. Goles</label>
@@ -122,7 +160,7 @@ function App() {
             </div>
 
             <button type="submit" className="predict-btn" disabled={cargando}>
-              {cargando ? 'Analizando...' : 'Obtener Predicción'}
+              {cargando ? "Analizando..." : "Obtener Predicción"}
             </button>
           </form>
         </div>
@@ -132,7 +170,8 @@ function App() {
         {resultado && (
           <div className="result-card">
             <div className="result-header">
-              <h2>Resultado del Análisis</h2>
+              <h2>{equipoLocal} vs {equipoVisitante}</h2>
+              <p className="ligas-info">{ligaLocal} · {ligaVisitante}</p>
             </div>
 
             <div className="prediction-box" style={{ borderColor: getColor(resultado.prediccion_final) }}>
