@@ -1,0 +1,38 @@
+# Parámetros centrales del experimento (Reproducibilidad)
+semilla: 42
+test_size: 0.20
+
+nlp:
+  # Opciones de reducción morfológica: "stemming" o "lematizacion"
+  reduccion: "stemming"
+  # Rango de n-gramas: [1, 1] para unigramas, [1, 2] para unigramas + bigramas
+  ngram_range: [1, 2]
+  max_features: 5000
+  min_df: 2
+  max_df: 0.95
+  # Stop words personalizadas que NO se eliminan porque alteran el sentimiento
+  conservar_negaciones:
+    - "no"
+    - "nunca"
+    - "jamas"
+    - "sin"
+    - "ni"
+    - "tampoco"
+
+modelos_nlp:
+  naive_bayes:
+    alpha: 1.0
+  logistic_regression:
+    C: 2.0
+    max_iter: 1000
+    class_weight: "balanced"
+
+modelo_stats:
+  # Modelo único para estadísticas de goles y racha
+  C: 1.0
+  max_iter: 1000
+
+ensamble:
+  # Pesos para combinar ambos modelos en producción (deben sumar 1.0)
+  peso_stats: 0.60
+  peso_nlp: 0.40
