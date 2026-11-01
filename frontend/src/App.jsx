@@ -258,6 +258,38 @@ function App() {
                 Peso NLP: {resultado.desglose_modelos.pesos_aplicados.peso_nlp * 100}%
               </p>
             </div>
+
+            {resultado.preprocesamiento_paso_a_paso && (
+              <div className="preprocess-section">
+                <h3>Preprocesamiento NLP (paso a paso)</h3>
+                <div className="preprocess-grid">
+                  {resultado.preprocesamiento_paso_a_paso.texto_normalizado && (
+                    <div className="preprocess-item">
+                      <h4>Texto normalizado</h4>
+                      <p>{resultado.preprocesamiento_paso_a_paso.texto_normalizado}</p>
+                    </div>
+                  )}
+                  {resultado.preprocesamiento_paso_a_paso.tokens && (
+                    <div className="preprocess-item">
+                      <h4>Tokens</h4>
+                      <p>{Array.isArray(resultado.preprocesamiento_paso_a_paso.tokens) ? resultado.preprocesamiento_paso_a_paso.tokens.join(", ") : resultado.preprocesamiento_paso_a_paso.tokens}</p>
+                    </div>
+                  )}
+                  {resultado.preprocesamiento_paso_a_paso.stop_words_eliminadas && (
+                    <div className="preprocess-item">
+                      <h4>Stop words eliminadas</h4>
+                      <p>{Array.isArray(resultado.preprocesamiento_paso_a_paso.stop_words_eliminadas) ? resultado.preprocesamiento_paso_a_paso.stop_words_eliminadas.join(", ") : resultado.preprocesamiento_paso_a_paso.stop_words_eliminadas}</p>
+                    </div>
+                  )}
+                  {resultado.preprocesamiento_paso_a_paso.stemming_o_lemas && (
+                    <div className="preprocess-item">
+                      <h4>Stemming / Lemas</h4>
+                      <p>{Array.isArray(resultado.preprocesamiento_paso_a_paso.stemming_o_lemas) ? resultado.preprocesamiento_paso_a_paso.stemming_o_lemas.join(", ") : resultado.preprocesamiento_paso_a_paso.stemming_o_lemas}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
