@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 
 const LIGAS = {
@@ -30,6 +30,43 @@ function App() {
   const [resultado, setResultado] = useState(null)
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState("")
+
+  const audioRef = useRef(null)
+
+  useEffect(() => {
+    audioRef.current = new Audio("/champions.mp3")
+    audioRef.current.volume = 0.6
+  }, [])
+
+  const playChampions = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0
+      audioRef.current.play().catch(() => {})
+    }
+  }
+
+  const stopChampions = () => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+    }
+  }
+
+  const handleLigaLocal = (e) => {
+    const value = e.target.value
+    setLigaLocal(value)
+    setEquipoLocal(LIGAS[value][0])
+    if (value === "Champions League") playChampions()
+    else stopChampions()
+  }
+
+  const handleLigaVisitante = (e) => {
+    const value = e.target.value
+    setLigaVisitante(value)
+    setEquipoVisitante(LIGAS[value][0])
+    if (value === "Champions League") playChampions()
+    else stopChampions()
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -116,7 +153,7 @@ function App() {
             <div className="stats-grid">
               <div className="stat-group">
                 <label>Liga Local</label>
-                <select value={ligaLocal} onChange={(e) => { setLigaLocal(e.target.value); setEquipoLocal(LIGAS[e.target.value][0]) }}>
+                <select value={ligaLocal} onChange={handleLigaLocal}>
                   {Object.keys(LIGAS).map(liga => <option key={liga}>{liga}</option>)}
                 </select>
                 <label>Equipo Local</label>
@@ -139,7 +176,7 @@ function App() {
 
               <div className="stat-group">
                 <label>Liga Visitante</label>
-                <select value={ligaVisitante} onChange={(e) => { setLigaVisitante(e.target.value); setEquipoVisitante(LIGAS[e.target.value][0]) }}>
+                <select value={ligaVisitante} onChange={handleLigaVisitante}>
                   {Object.keys(LIGAS).map(liga => <option key={liga}>{liga}</option>)}
                 </select>
                 <label>Equipo Visitante</label>
